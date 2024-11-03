@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スパムフィルター解析用　ver.0.5</title>
+</head>
+<body>
+
+  <input type="text" id="inputString" placeholder="ユニコを入力">
+  <button onclick="truncateAndCopy()">解析してコピー</button>
+
+  <p id="result"></p>
+
+  <script>
+    function truncateAndCopy() {
+      // 入力された文字列を取得
+      var inputString = document.getElementById('inputString').value;
+
+      // 最初の2つの文字を残す
+      var truncatedString = inputString.substring(0, 2);
+      
+      // 結果を表示
+      document.getElementById('result').innerHTML = 'コピー完了';
+      
+      // コピーする
+      copyToClipboard(truncatedString);
+    }
+
+    function copyToClipboard(text) {
+      var input = document.createElement('input');
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+    }
+  </script>
+
+</body>
+</html>
