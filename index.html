@@ -1,41 +1,203 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>スパムフィルター解析用　ver.0.5</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>円をクリックして得点を上げるゲーム</title>
+    <style>
+        body {
+            background-color: #121212; /* 背景色を黒に設定 */
+            color: white; /* テキストの色を白に設定 */
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #gameArea {
+            width: 400px;
+            height: 400px;
+            border: 2px solid white; /* 四角のボーダーを白に設定 */
+            position: relative;
+            overflow: hidden;
+            display: none; /* 初期は非表示 */
+        }
+        #circle {
+            width: 50px;
+            height: 50px;
+            background-color: white; /* 円の色を白に設定 */
+            border-radius: 50%; /* 円を作成 */
+            position: absolute;
+        }
+        #score {
+            font-size: 24px; /* スコアのフォントサイズを設定 */
+            margin-bottom: 20px;
+        }
+        #timer {
+            font-size: 24px; /* タイマーのフォントサイズを設定 */
+            margin-bottom: 20px;
+        }
+        #gameOver {
+            display: none; /* ゲームオーバーメッセージを初期非表示 */
+            font-size: 32px; /* ゲームオーバーのフォントサイズを設定 */
+            color: red; /* ゲームオーバーの色を赤に設定 */
+        }
+        #continueButton {
+            display: none; /* コンティニューボタンを初期非表示 */
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: white; /* ボタンの背景を白に設定 */
+            color: black; /* ボタンのテキストを黒に設定 */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #startScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #startScreen h1 {
+            font-size: 36px; /* スタート画面のタイトルのフォントサイズを設定 */
+        }
+        #startScreen p {
+            font-size: 24px; /* スタート画面の説明のフォントサイズを設定 */
+        }
+    </style>
 </head>
 <body>
+    <div id="startScreen">
+        <h1>円クリックゲーム</h1>
+        <p>スペースキーを押してスタート!</p>
+    </div>
+    <div id="score">スコア: 0</div>
+    <div id="timer">タイマー: 1.00秒</div> <!-- タイマー表示 -->
+    <div id="gameArea">
+        <div id="circle"></div>
+    </div>
+    <div id="gameOver">ゲームオーバー!</div> <!-- ゲームオーバーメッセージ -->
+    <div id="finalScore" style="display: none; font-size: 24px; margin-top: 20px;">最終スコア: 0</div> <!-- 最終スコア -->
+    <button id="continueButton" onclick="continueGame()">コンティニュー</button> <!-- コンティニューボタン -->
 
-  <input type="text" id="inputString" placeholder="ユニコを入力">
-  <button onclick="truncateAndCopy()">解析してコピー</button>
+    <script>
+        let score = 0; // スコア初期化
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const circle = document.getElementById('circle');
+        const gameArea = document.getElementById('gameArea');
+        const gameOverDisplay = document.getElementById('gameOver');
+        const continueButton = document.getElementById('continueButton');
+        const finalScoreDisplay = document.getElementById('finalScore'); // 最終スコア表示用
+        const startScreen = document.getElementById('startScreen');
 
-  <p id="result"></p>
+        let timer; // タイマーのID
+        let timeLeft = 1.0; // タイマーの残り時間
 
-  <script>
-    function truncateAndCopy() {
-      // 入力された文字列を取得
-      var inputString = document.getElementById('inputString').value;
+        // スタート画面を非表示にしてゲームを開始する関数
+        function startGame() {
+            startScreen.style.display = 'none'; // スタート画面を非表示
+            gameArea.style.display = 'block'; // ゲームエリアを表示
+            moveCircle(); // 円を移動
+            startTimer(); // タイマーをスタート
+        }
 
-      // 最初の2つの文字を残す
-      var truncatedString = inputString.substring(0, 2);
-      
-      // 結果を表示
-      document.getElementById('result').innerHTML = 'コピー完了';
-      
-      // コピーする
-      copyToClipboard(truncatedString);
-    }
+        // 円をランダムな位置に移動させる関数
+        function moveCircle() {
+            const maxX = gameArea.clientWidth - circle.clientWidth;
+            const maxY = gameArea.clientHeight - circle.clientHeight;
 
-    function copyToClipboard(text) {
-      var input = document.createElement('input');
-      input.value = text;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      document.body.removeChild(input);
-    }
-  </script>
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
 
+            circle.style.left = randomX + 'px';
+            circle.style.top = randomY + 'px';
+        }
+
+        // タイマーを開始する関数
+        function startTimer() {
+            timeLeft = 1.0; // タイマーを1.0秒にリセット
+            timerDisplay.textContent = `タイマー: ${timeLeft.toFixed(2)}秒`;
+
+            timer = setInterval(() => {
+                timeLeft -= 0.01; // タイマーを0.01秒ずつ減らす
+                timerDisplay.textContent = `タイマー: ${timeLeft.toFixed(2)}秒`;
+
+                if (timeLeft <= 0) {
+                    gameOver(); // ゲームオーバー処理を呼び出す
+                }
+            }, 10); // 10ミリ秒ごとに更新
+        }
+
+        // 円がクリックされたときの処理
+        circle.addEventListener('click', function(event) {
+            const circleRect = circle.getBoundingClientRect();
+            const clickX = event.clientX;
+            const clickY = event.clientY;
+
+            // 円の中心を計算
+            const centerX = circleRect.left + circleRect.width / 2;
+            const centerY = circleRect.top + circleRect.height / 2;
+
+            // 中心からの距離を計算
+            const distance = Math.sqrt((clickX - centerX) ** 2 + (clickY - centerY) ** 2);
+
+            if (distance <= circleRect.width / 2) { // 円の内部をクリックした場合
+                if (distance <= 15) { // 中心をクリックした場合
+                    score += 2; // スコアを2増加
+                } else {
+                    score += 1; // スコアを1増加
+                }
+                scoreDisplay.textContent = 'スコア: ' + score; // スコアを更新
+                moveCircle(); // 円を移動
+
+                // タイマーの更新
+                clearInterval(timer); // 現在のタイマーをクリア
+                const newTime = Math.max(1.0 - (Math.floor(score / 20) * 0.15), 0.1); // スコアに応じて時間を調整
+                timeLeft = newTime; // 新しいタイマーの残り時間を設定
+                startTimer(); // タイマーを再スタート
+                event.stopPropagation(); // イベントのバブリングを防止
+            }
+        });
+
+        // ゲームエリアがクリックされたときの処理
+        gameArea.addEventListener('click', function(event) {
+            // 円の外をクリックした場合
+            if (event.target !== circle) {
+                gameOver(); // ゲームオーバーを呼び出す
+            }
+        });
+
+        // ゲームオーバー処理
+        function gameOver() {
+            clearInterval(timer); // タイマーをクリア
+            gameOverDisplay.style.display = 'block'; // ゲームオーバーメッセージを表示
+            continueButton.style.display = 'block'; // コンティニューボタンを表示
+            finalScoreDisplay.style.display = 'block'; // 最終スコアを表示
+            finalScoreDisplay.textContent = '最終スコア: ' + score; // 最終スコアを更新
+            circle.style.display = 'none'; // 円を非表示にする
+            score = 0; // スコアをリセット
+            scoreDisplay.textContent = 'スコア: ' + score; // スコアを更新
+            timerDisplay.textContent = 'タイマー: 1.00秒'; // タイマーをリセット
+        }
+
+        // コンティニュー処理
+        function continueGame() {
+            location.reload(); // ページをリロード
+        }
+
+        // スペースキーを押したときの処理
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                if (gameOverDisplay.style.display === 'block') {
+                    continueGame(); // ゲームオーバー時はコンティニュー
+                } else {
+                    startGame(); // ゲームをスタート
+                }
+            }
+        });
+    </script>
 </body>
 </html>
